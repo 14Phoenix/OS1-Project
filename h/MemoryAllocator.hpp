@@ -1,6 +1,6 @@
 #ifndef PROJECT_BASE_H_MEMORYALLOCATOR
 #define PROJECT_BASE_H_MEMORYALLOCATOR
-#pragma once
+
 
 #include "../lib/hw.h"
 
@@ -28,7 +28,7 @@ private:
 
     BlockHeader *freeMemHead = nullptr;
 
-
 };
+
 
 #endif //PROJECT_BASE_H_MEMORYALLOCATOR
