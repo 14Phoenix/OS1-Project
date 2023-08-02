@@ -19,19 +19,23 @@ void *MemoryAllocator::memAlloc(size_t size) {
             size_t remaining = current->size - size;
 
             if (remaining >= sizeof(BlockHeader) + MEM_BLOCK_SIZE) {
-                BlockHeader *newBlock = (BlockHeader*)(((uint8*) current) + sizeof(BlockHeader) + size);
+                BlockHeader *newBlock = (BlockHeader*)((uint8*) current + sizeof(BlockHeader) + size);
                 newBlock->next = current->next;
                 newBlock->size = remaining - sizeof(BlockHeader);
                 current->size = size;
-                if (previous != nullptr) previous->next = newBlock;
-                else freeMemHead = newBlock;
+                if (previous != nullptr)
+                    previous->next = newBlock;
+                else
+                    freeMemHead = newBlock;
             } else {
-                if (previous != nullptr) previous->next = current->next;
-                else freeMemHead = current->next;
+                if (previous != nullptr)
+                    previous->next = current->next;
+                else
+                    freeMemHead = current->next;
             }
 
             current->next = nullptr;
-            allocated = (void*)((uint8*)current + sizeof(BlockHeader));
+            allocated = (void*)((uint8*) current + sizeof(BlockHeader));
             break;
         }
         previous = current;
@@ -45,7 +49,7 @@ int MemoryAllocator::memFree(void *ptr) {
     if ((uint8*) ptr >= (uint8*) HEAP_END_ADDR || (uint8*) ptr < (uint8*) HEAP_START_ADDR) return -1;
 
 
-    BlockHeader *block = (BlockHeader*)(((uint8*) ptr) - sizeof(BlockHeader));
+    BlockHeader *block = (BlockHeader*)((uint8*) ptr - sizeof(BlockHeader));
     if (block->next != nullptr) return -2;
 
     BlockHeader *current = freeMemHead, *previous = nullptr;
@@ -54,11 +58,10 @@ int MemoryAllocator::memFree(void *ptr) {
         current = current->next;
     }
 
-    if (previous != nullptr) {
+    if (previous != nullptr)
         previous->next = block;
-    } else {
+    else
         freeMemHead = block;
-    }
     block->next = current;
 
     BlockHeader *startBlockToJoin = block;
@@ -70,7 +73,7 @@ int MemoryAllocator::memFree(void *ptr) {
         previous->size += sizeof(BlockHeader) + block->size;
     }
 
-    // Try to join previous + block or just block (if previous == nullptr)
+    // Try to join previous + block or just block (if previous == nullptr) and current
     if (current != nullptr && (uint8*) startBlockToJoin + sizeof(BlockHeader) + startBlockToJoin->size == (uint8*) current) {
         startBlockToJoin->next = current->next;
         startBlockToJoin->size += sizeof(BlockHeader) + current->size;
