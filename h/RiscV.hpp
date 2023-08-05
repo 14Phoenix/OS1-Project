@@ -3,6 +3,8 @@
 
 
 #include "../lib/hw.h"
+#include "./MemoryAllocator.hpp"
+#include "./PCB.hpp"
 
 
 class RiscV {
