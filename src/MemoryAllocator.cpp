@@ -46,8 +46,9 @@ void *MemoryAllocator::memAlloc(size_t size) {
 }
 
 int MemoryAllocator::memFree(void *ptr) {
-    if ((uint8*) ptr >= (uint8*) HEAP_END_ADDR || (uint8*) ptr < (uint8*) HEAP_START_ADDR) return -1;
+    if (ptr == nullptr) return 0;
 
+    if ((uint8*) ptr >= (uint8*) HEAP_END_ADDR || (uint8*) ptr < (uint8*) HEAP_START_ADDR) return -1;
 
     BlockHeader *block = (BlockHeader*)((uint8*) ptr - sizeof(BlockHeader));
     if (block->next != nullptr) return -2;
