@@ -4,11 +4,14 @@
 
 #include "../lib/hw.h"
 #include "./MemoryAllocator.hpp"
+#include "./RiscV.hpp"
 #include "./Scheduler.hpp"
 
 
 class PCB {
 public:
+    ~PCB();
+
     using Body = void (*)(void*);
 
     static PCB* createPCB(Body body, void *arg, void* stack);
@@ -29,7 +32,8 @@ private:
     context({
         (uint64) &threadWrapper,
         stack != nullptr ? (uint64) &(((uint8*)stack)[DEFAULT_STACK_SIZE]) : 0
-    }) {
+    }),
+    finished(false) {
         if (body != nullptr) Scheduler::put(this);
     }
 
@@ -56,6 +60,22 @@ private:
     static void dispatch();
 
     static uint64 timeSliceCounter;
+
+    // Access from RiscV
+    friend class RiscV;
+
+    // Scheduler linked list
+    friend class Scheduler;
+
+    enum PCBState {
+        RUNNING = 0,
+        READY = 1,
+        BLOCKED = 2
+    };
+
+    PCBState state = PCBState::RUNNING;
+    PCB *next = nullptr;
+
 
 };
 

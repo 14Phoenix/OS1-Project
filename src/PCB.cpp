@@ -4,6 +4,11 @@ PCB *PCB::running = nullptr;
 
 uint64 PCB::timeSliceCounter = 0;
 
+PCB::~PCB() {
+    // probably will need to deallocate system stack
+    MemoryAllocator::getInstance()->memFree(stack);
+}
+
 PCB *PCB::createPCB(PCB::Body body, void *arg, void *stack) {
 //    size_t sizeToAllocate = (sizeof(PCB) / MEM_BLOCK_SIZE + (sizeof(PCB) % MEM_BLOCK_SIZE > 0 ? 1 : 0)) * MEM_BLOCK_SIZE;
 //    PCB *pcb = (PCB*) MemoryAllocator::getInstance()->memAlloc(sizeToAllocate);
@@ -20,8 +25,9 @@ void PCB::setFinished(bool finished) {
 }
 
 void PCB::yield() {
-    // add a0 code for dispatch for handleSupervisorTrap
-    // __asm__ volatile ("ecall");
+    // syscall thread_dispatch
+    __asm__ volatile ("mv a0, %[code]" : : [code] "r" (0x013UL));
+    __asm__ volatile ("ecall");
 }
 
 void *PCB::operator new(size_t size) {
@@ -34,7 +40,7 @@ void PCB::operator delete(void *ptr) {
 }
 
 void PCB::threadWrapper() {
-    // sret here
+    RiscV::popSppSpie();
     running->body(running->arg);
     running->setFinished(true);
     yield();
