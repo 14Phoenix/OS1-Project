@@ -16,13 +16,37 @@ public:
 
     static PCB* createPCB(Body body, void *arg, void* stack);
 
-    bool isFinished() const;
+//    bool isFinished() const;
 
-    void setFinished(bool finished);
+//    void setFinished(bool finished);
+
+    static PCB* getRunning();
+
+    static void setRunning(PCB* newRunning);
+
+    static uint64 getTimeSliceCounter();
+
+    static void setTimeSliceCounter(uint64 value);
+
+    static void dispatch();
 
     static void yield();
 
-    static PCB *running;
+    enum PCBState {
+        RUNNING = 0,
+        READY = 1,
+        BLOCKED = 2,
+        WAITING = 3,
+        FINISHED = 4
+    };
+
+    PCBState getState() const;
+
+    void setState(PCBState newState);
+
+    PCB* getNext() const;
+
+    void setNext(PCB* newNext);
 
 private:
     PCB(Body body, void *arg, void* stack) :
@@ -33,9 +57,7 @@ private:
         (uint64) &threadWrapper,
         stack != nullptr ? (uint64) &(((uint8*)stack)[DEFAULT_STACK_SIZE]) : 0
     }),
-    finished(false) {
-        if (body != nullptr) Scheduler::put(this);
-    }
+    state(PCBState::READY) {}
 
     void* operator new(size_t size);
 
@@ -51,31 +73,23 @@ private:
     void *stack;
     Context context;
 
-    bool finished;
+//    bool finished;
 
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 
-    static void dispatch();
-
+    static PCB *running;
     static uint64 timeSliceCounter;
 
     // Access from RiscV
-    friend class RiscV;
+//    friend class RiscV;
 
     // Scheduler linked list
-    friend class Scheduler;
+//    friend class Scheduler;
 
-    enum PCBState {
-        RUNNING = 0,
-        READY = 1,
-        BLOCKED = 2
-    };
-
-    PCBState state = PCBState::RUNNING;
+    PCBState state;
     PCB *next = nullptr;
-
 
 };
 

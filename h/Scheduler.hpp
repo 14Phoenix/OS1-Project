@@ -3,6 +3,7 @@
 
 
 #include "../lib/hw.h"
+#include "./PCB_Queue.hpp"
 
 
 class PCB;
@@ -16,14 +17,8 @@ public:
     static Scheduler* getInstance();
 
 private:
-    PCB *readyHead = nullptr, *readyTail = nullptr;
-//    struct Node {
-//        Node *next;
-//        PCB *pcb;
-//    };
-//
-//    Node *head, *tail;
-
+    PCB_Queue queue;
+//    PCB *readyHead = nullptr, *readyTail = nullptr;
 
 };
 
