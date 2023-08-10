@@ -74,6 +74,14 @@ void PCB::setNext(PCB *newNext) {
     next = newNext;
 }
 
+int PCB::getSemWaitRet() const {
+    return semWaitRet;
+}
+
+void PCB::setSemWaitRet(int ret) {
+    semWaitRet = ret;
+}
+
 void *PCB::operator new(size_t size) {
     size_t sizeToAllocate = (sizeof(PCB) / MEM_BLOCK_SIZE + (sizeof(PCB) % MEM_BLOCK_SIZE > 0 ? 1 : 0)) * MEM_BLOCK_SIZE;
     return MemoryAllocator::getInstance()->memAlloc(sizeToAllocate);

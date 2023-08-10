@@ -48,6 +48,10 @@ public:
 
     void setNext(PCB* newNext);
 
+    int getSemWaitRet() const;
+
+    void setSemWaitRet(int ret);
+
 private:
     PCB(Body body, void *arg, void* stack) :
     body(body),
@@ -90,6 +94,8 @@ private:
 
     PCBState state;
     PCB *next = nullptr;
+
+    int semWaitRet = 0;
 
 };
 
