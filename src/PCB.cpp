@@ -2,6 +2,8 @@
 
 PCB *PCB::running = nullptr;
 
+PCB *PCB::waitHead = nullptr;
+
 uint64 PCB::timeSliceCounter = 0;
 
 PCB::~PCB() {
@@ -20,14 +22,6 @@ PCB *PCB::createPCB(PCB::Body body, void *arg, void *stack) {
     return pcb;
 }
 
-//bool PCB::isFinished() const {
-//    return finished;
-//}
-
-//void PCB::setFinished(bool finished) {
-//    this->finished = finished;
-//}
-
 PCB *PCB::getRunning() {
     return running;
 }
@@ -37,17 +31,24 @@ void PCB::setRunning(PCB *newRunning) {
     running->setState(PCBState::RUNNING);
 }
 
-uint64 PCB::getTimeSliceCounter() {
+time_t PCB::getTimeSliceCounter() {
     return timeSliceCounter;
 }
 
-void PCB::setTimeSliceCounter(uint64 value) {
+void PCB::setTimeSliceCounter(time_t value) {
     timeSliceCounter = value;
+}
+
+void PCB::incTimeSliceCounter() {
+    timeSliceCounter++;
 }
 
 void PCB::dispatch() {
     PCB *oldPCB = running;
-    if (oldPCB->state != PCBState::FINISHED && oldPCB->state != PCBState::BLOCKED) Scheduler::put(oldPCB);
+    if (oldPCB->state != PCBState::FINISHED &&
+        oldPCB->state != PCBState::BLOCKED &&
+        oldPCB->state != PCBState::WAITING &&
+        oldPCB->state != PCBState::SLEEPING) Scheduler::put(oldPCB);
     setRunning(Scheduler::get());
     contextSwitch(&oldPCB->context, &running->context);
 }
@@ -58,11 +59,51 @@ void PCB::yield() {
     __asm__ volatile ("ecall");
 }
 
+void PCB::join(PCB *pcb) {
+    if (pcb->state == PCBState::FINISHED) return;
+    running->setState(PCBState::WAITING);
+    pcb->joinQueue.put(running);
+    dispatch();
+}
+
+void PCB::wait(time_t time) {
+    running->setState(PCBState::SLEEPING);
+    running->setTimeToSleep(time);
+
+    PCB *current = waitHead, *previous = nullptr;
+    while (current != nullptr && current->timeToSleep<= running->timeToSleep) {
+        running->timeToSleep -= current->timeToSleep;
+        previous = current;
+        current = current->next;
+    }
+
+    if (previous != nullptr)
+        previous->next = running;
+    else
+        waitHead = running;
+    running->setNext(current);
+
+    if (current != nullptr) current->timeToSleep -= running->timeToSleep;
+
+    dispatch();
+}
+
+void PCB::updateWait() {
+    if (waitHead != nullptr) waitHead->timeToSleep--;
+    for (;waitHead != nullptr && waitHead->timeToSleep == 0; waitHead = waitHead->next) {
+        Scheduler::put(waitHead);
+    }
+}
+
 PCB::PCBState PCB::getState() const {
     return state;
 }
 
 void PCB::setState(PCB::PCBState newState) {
+    if (newState == PCBState::FINISHED) {
+        for (PCB *pcb = joinQueue.get(); pcb != nullptr; pcb = joinQueue.get())
+            Scheduler::put(pcb);
+    }
     state = newState;
 }
 
@@ -80,6 +121,18 @@ int PCB::getSemWaitRet() const {
 
 void PCB::setSemWaitRet(int ret) {
     semWaitRet = ret;
+}
+
+time_t PCB::getTimeToSleep() const {
+    return timeToSleep;
+}
+
+void PCB::setTimeToSleep(time_t time) {
+    timeToSleep = time;
+}
+
+time_t PCB::getTimeSlice() const {
+    return timeSlice;
 }
 
 void *PCB::operator new(size_t size) {
