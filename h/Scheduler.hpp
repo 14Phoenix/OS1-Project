@@ -17,8 +17,12 @@ public:
     static Scheduler* getInstance();
 
 private:
+    Scheduler();
+
     PCB_Queue queue;
-//    PCB *readyHead = nullptr, *readyTail = nullptr;
+    PCB *emptyPCB;
+
+    static void emptyBody(void *arg);
 
 };
 
