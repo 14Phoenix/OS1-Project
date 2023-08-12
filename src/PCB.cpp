@@ -22,6 +22,11 @@ PCB *PCB::createPCB(PCB::Body body, void *arg, void *stack) {
     return pcb;
 }
 
+PCB *PCB::createPCBnoStart(PCB::Body body, void *arg, void *stack) {
+    PCB *pcb = new PCB(body, arg, stack);
+    return pcb;
+}
+
 PCB *PCB::getRunning() {
     return running;
 }
@@ -71,7 +76,7 @@ void PCB::wait(time_t time) {
     running->setTimeToSleep(time);
 
     PCB *current = waitHead, *previous = nullptr;
-    while (current != nullptr && current->timeToSleep<= running->timeToSleep) {
+    while (current != nullptr && current->timeToSleep <= running->timeToSleep) {
         running->timeToSleep -= current->timeToSleep;
         previous = current;
         current = current->next;
@@ -90,8 +95,10 @@ void PCB::wait(time_t time) {
 
 void PCB::updateWait() {
     if (waitHead != nullptr) waitHead->timeToSleep--;
-    for (;waitHead != nullptr && waitHead->timeToSleep == 0; waitHead = waitHead->next) {
+    while (waitHead != nullptr && waitHead->timeToSleep == 0) {
+        PCB *pcb = waitHead->next;
         Scheduler::put(waitHead);
+        waitHead = pcb;
     }
 }
 

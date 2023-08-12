@@ -17,6 +17,8 @@ public:
 
     static PCB* createPCB(Body body, void *arg, void* stack);
 
+    static PCB* createPCBnoStart(Body body, void *arg, void* stack);
+
     static PCB* getRunning();
 
     static void setRunning(PCB* newRunning);
