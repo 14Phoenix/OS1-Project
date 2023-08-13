@@ -5,6 +5,8 @@
 #include "../lib/hw.h"
 #include "./MemoryAllocator.hpp"
 #include "./PCB.hpp"
+#include "./K_Semaphore.hpp"
+#include "./CharBuffer.hpp"
 
 
 class RiscV {
@@ -73,6 +75,8 @@ public:
     static void w_sstatus(uint64 sstatus);
 
     static void supervisorTrap();
+
+    static void consoleOutputBody(void *arg);
 
 private:
     static void handleSupervisorTrap();
