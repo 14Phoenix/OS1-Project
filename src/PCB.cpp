@@ -12,8 +12,6 @@ PCB::~PCB() {
 }
 
 PCB *PCB::createPCB(PCB::Body body, void *arg, void *stack) {
-//    size_t sizeToAllocate = (sizeof(PCB) / MEM_BLOCK_SIZE + (sizeof(PCB) % MEM_BLOCK_SIZE > 0 ? 1 : 0)) * MEM_BLOCK_SIZE;
-//    PCB *pcb = (PCB*) MemoryAllocator::getInstance()->memAlloc(sizeToAllocate);
     PCB *pcb = new PCB(body, arg, stack);
     if (body != nullptr)
         Scheduler::put(pcb);
@@ -24,6 +22,15 @@ PCB *PCB::createPCB(PCB::Body body, void *arg, void *stack) {
 
 PCB *PCB::createPCBnoStart(PCB::Body body, void *arg, void *stack) {
     PCB *pcb = new PCB(body, arg, stack);
+    return pcb;
+}
+
+PCB *PCB::createKernelPCB(PCB::Body body, void *arg, void *stack) {
+    PCB *pcb = new PCB(body, arg, stack, true);
+    if (body != nullptr)
+        Scheduler::put(pcb);
+    else
+        setRunning(pcb);
     return pcb;
 }
 
@@ -142,6 +149,10 @@ time_t PCB::getTimeSlice() const {
     return timeSlice;
 }
 
+bool PCB::isKernelPCB() const {
+    return kernelPCB;
+}
+
 void *PCB::operator new(size_t size) {
     size_t sizeToAllocate = (sizeof(PCB) / MEM_BLOCK_SIZE + (sizeof(PCB) % MEM_BLOCK_SIZE > 0 ? 1 : 0)) * MEM_BLOCK_SIZE;
     return MemoryAllocator::getInstance()->memAlloc(sizeToAllocate);
@@ -152,6 +163,10 @@ void PCB::operator delete(void *ptr) {
 }
 
 void PCB::threadWrapper() {
+    if (running->isKernelPCB())
+        RiscV::ms_sstatus(RiscV::BitMaskSstatus::SSTATUS_SPP);
+    else
+        RiscV::mc_sstatus(RiscV::BitMaskSstatus::SSTATUS_SPP);
     RiscV::popSppSpie();
     running->body(running->arg);
     running->setState(PCBState::FINISHED);

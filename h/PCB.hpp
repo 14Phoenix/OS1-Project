@@ -19,6 +19,8 @@ public:
 
     static PCB* createPCBnoStart(Body body, void *arg, void* stack);
 
+    static PCB* createKernelPCB(Body body, void *arg, void* stack);
+
     static PCB* getRunning();
 
     static void setRunning(PCB* newRunning);
@@ -66,8 +68,10 @@ public:
 
     time_t getTimeSlice() const;
 
+    bool isKernelPCB() const;
+
 private:
-    PCB(Body body, void *arg, void* stack) :
+    PCB(Body body, void *arg, void* stack, bool kernelPCB = false) :
     body(body),
     arg(arg),
     stack(body != nullptr ? stack : nullptr),
@@ -75,6 +79,7 @@ private:
         (uint64) &threadWrapper,
         stack != nullptr ? (uint64) &(((uint8*)stack)[DEFAULT_STACK_SIZE]) : 0
     }),
+    kernelPCB(kernelPCB),
     state(PCBState::READY) {}
 
     void* operator new(size_t size);
@@ -91,6 +96,7 @@ private:
     void *stack;
     Context context;
 
+    bool kernelPCB;
     time_t timeSlice = DEFAULT_TIME_SLICE;
 
     static void threadWrapper();
