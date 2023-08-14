@@ -1,5 +1,5 @@
 #include "../h/CharBuffer.hpp"
-#include "../h/syscall_c.h"
+#include "../h/syscall_c.hpp"
 
 CharInputBuffer *CharInputBuffer::getInstance() {
     static CharInputBuffer instance;

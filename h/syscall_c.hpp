@@ -1,4 +1,9 @@
+#ifndef PROJECT_BASE_H_SYSCALL_C_H
+#define PROJECT_BASE_H_SYSCALL_C_H
+
+
 #include "../lib/hw.h"
+
 
 void* mem_alloc(size_t size);
 
@@ -35,3 +40,6 @@ const int EOF = -1;
 char getc();
 
 void putc(char c);
+
+
+#endif // PROJECT_BASE_H_SYSCALL_C_H

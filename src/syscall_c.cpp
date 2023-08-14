@@ -1,4 +1,4 @@
-#include "../h/syscall_c.h"
+#include "../h/syscall_c.hpp"
 
 void *mem_alloc(size_t size) {
     size_t volatile numOfBlocks = size / MEM_BLOCK_SIZE + (size % MEM_BLOCK_SIZE > 0 ? 1 : 0);
