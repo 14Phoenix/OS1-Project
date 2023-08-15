@@ -159,8 +159,11 @@ void RiscV::handleSupervisorTrap() {
             // int time_sleep(time_t time)
             case 0x031UL: {
                 time_t time = (time_t) arg1;
-                PCB::wait(time);
                 int errorCode = 0;
+                if (time == 0)
+                    errorCode = -1;
+                else
+                    PCB::wait(time);
                 __asm__ volatile ("mv t1, %[stackPointer];"
                                   "sd %[error], 10 * 8(t1)" : : [stackPointer] "r"(stackPointer), [error] "r"(errorCode) : "t1");
                 break;
