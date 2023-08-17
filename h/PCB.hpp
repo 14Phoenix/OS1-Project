@@ -103,7 +103,10 @@ private:
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 
+    static void freeStackOldRunning();
+
     static PCB *running;
+    static PCB *oldRunning;
     static PCB *waitHead;
     static time_t timeSliceCounter;
 

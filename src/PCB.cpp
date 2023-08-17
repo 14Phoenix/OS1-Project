@@ -2,6 +2,8 @@
 
 PCB *PCB::running = nullptr;
 
+PCB *PCB::oldRunning = nullptr;
+
 PCB *PCB::waitHead = nullptr;
 
 uint64 PCB::timeSliceCounter = 0;
@@ -56,13 +58,14 @@ void PCB::incTimeSliceCounter() {
 }
 
 void PCB::dispatch() {
-    PCB *oldPCB = running;
-    if (oldPCB->state != PCBState::FINISHED &&
-        oldPCB->state != PCBState::BLOCKED &&
-        oldPCB->state != PCBState::WAITING &&
-        oldPCB->state != PCBState::SLEEPING) Scheduler::put(oldPCB);
+    oldRunning = running;
+    if (oldRunning->state != PCBState::FINISHED &&
+        oldRunning->state != PCBState::BLOCKED &&
+        oldRunning->state != PCBState::WAITING &&
+        oldRunning->state != PCBState::SLEEPING) Scheduler::put(oldRunning);
     setRunning(Scheduler::get());
-    contextSwitch(&oldPCB->context, &running->context);
+    contextSwitch(&oldRunning->context, &running->context);
+    freeStackOldRunning();
 }
 
 void PCB::yield() {
@@ -163,6 +166,7 @@ void PCB::operator delete(void *ptr) {
 }
 
 void PCB::threadWrapper() {
+    freeStackOldRunning();
     if (running->isKernelPCB())
         RiscV::ms_sstatus(RiscV::BitMaskSstatus::SSTATUS_SPP);
     else
@@ -171,4 +175,10 @@ void PCB::threadWrapper() {
     running->body(running->arg);
     running->setState(PCBState::FINISHED);
     yield();
+}
+
+void PCB::freeStackOldRunning() {
+    if (oldRunning != nullptr && oldRunning->state == PCBState::FINISHED) {
+        MemoryAllocator::getInstance()->memFree(oldRunning->stack);
+    }
 }
