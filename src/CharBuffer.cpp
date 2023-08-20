@@ -25,6 +25,10 @@ bool CharInputBuffer::isFull() const {
     return count >= BUFFER_SIZE;
 }
 
+void CharInputBuffer::freeSem() {
+    K_Semaphore::deleteK_Semaphore(itemAvailable);
+}
+
 CharOutputBuffer *CharOutputBuffer::getInstance() {
     static CharOutputBuffer instance;
     return &instance;
@@ -45,4 +49,9 @@ void CharOutputBuffer::putc(char c) {
     tail = (tail + 1) % BUFFER_SIZE;
     count++;
     itemAvailable->signal();
+}
+
+void CharOutputBuffer::freeSem() {
+    K_Semaphore::deleteK_Semaphore(itemAvailable);
+    K_Semaphore::deleteK_Semaphore(spaceAvailable);
 }

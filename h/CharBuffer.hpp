@@ -16,6 +16,8 @@ public:
 
     bool isFull() const;
 
+    void freeSem();
+
 private:
     CharInputBuffer() :
     head(0), tail(0), count(0) {
@@ -41,6 +43,8 @@ public:
     char getc();
 
     void putc(char c);
+
+    void freeSem();
 
 private:
     CharOutputBuffer() :

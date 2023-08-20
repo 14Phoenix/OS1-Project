@@ -25,6 +25,10 @@ Scheduler *Scheduler::getInstance() {
     return &instance;
 }
 
+void Scheduler::freeEmptyPCB() {
+    MemoryAllocator::getInstance()->memFree(getInstance()->emptyPCB);
+}
+
 void Scheduler::emptyBody(void *arg) {
     while (true) {
 

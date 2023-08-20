@@ -16,6 +16,8 @@ public:
 
     static Scheduler* getInstance();
 
+    static void freeEmptyPCB();
+
 private:
     Scheduler();
 
