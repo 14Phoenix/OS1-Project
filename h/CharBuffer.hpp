@@ -44,6 +44,8 @@ public:
 
     void putc(char c);
 
+    bool isEmpty() const;
+
     void freeSem();
 
 private:

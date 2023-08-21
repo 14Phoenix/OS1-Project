@@ -51,6 +51,10 @@ void CharOutputBuffer::putc(char c) {
     itemAvailable->signal();
 }
 
+bool CharOutputBuffer::isEmpty() const {
+    return count == 0;
+}
+
 void CharOutputBuffer::freeSem() {
     K_Semaphore::deleteK_Semaphore(itemAvailable);
     K_Semaphore::deleteK_Semaphore(spaceAvailable);
