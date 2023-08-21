@@ -14,7 +14,6 @@ Thread::Thread(void (*body)(void *), void *arg) {
 }
 
 Thread::~Thread() {
-    // how to deallocate the stack
     mem_free(myHandle);
 }
 

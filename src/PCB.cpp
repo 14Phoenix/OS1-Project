@@ -9,7 +9,6 @@ PCB *PCB::waitHead = nullptr;
 uint64 PCB::timeSliceCounter = 0;
 
 PCB::~PCB() {
-    // probably will need to deallocate system stack
     MemoryAllocator::getInstance()->memFree(stack);
 }
 
