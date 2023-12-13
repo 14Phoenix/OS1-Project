@@ -74,6 +74,8 @@ public:
     // write register sstatus
     static void w_sstatus(uint64 sstatus);
 
+    static void trapVector();
+
     static void supervisorTrap();
 
     static void consoleOutputBody(void *arg);

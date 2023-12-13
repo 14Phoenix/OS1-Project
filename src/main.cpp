@@ -14,7 +14,7 @@ void userMainWrapperBody(void *arg) {
 }
 
 int main() {
-    RiscV::w_stvec((uint64) &RiscV::supervisorTrap);
+    RiscV::w_stvec((uint64) &RiscV::trapVector | 0x01UL);
 
     PCB *mainPCB = PCB::createKernelPCB(nullptr, nullptr, nullptr);
     if (mainPCB == nullptr) return 0;
